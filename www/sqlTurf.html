@@ -1,0 +1,457 @@
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+
+   <link rel="stylesheet" href="bootstrap.min.css">
+  <script src="jquery.min.js"></script>
+  <script src="bootstrap.min.js"></script>
+
+
+	<script type="text/javascript">
+		 // this is called when an error happens in a transaction
+		function errorHandler(transaction, error) {
+		    console.log('Error: ' + error.message + ' code: ' + error.code);
+
+		}
+
+		 // this is called when a successful transaction happens
+		function successCallBack() {
+		    console.log("DEBUGGING: success");
+
+		}
+		 //This is for Listing values present in the database
+		function ListDBValues() {
+		    $('#msgbox').html('');
+		    var db = openDatabase('mydb-test', '1.0', 'sqllite test database', 2 * 1024 * 1024);
+		    db.transaction(function (transaction) {
+		        transaction.executeSql('SELECT * FROM Racing;', [],
+		            function (transaction, result) {
+		                if (result != null && result.rows != null) {
+		                    console.log(result.rows)
+		                    for (var i = 0; i < result.rows.length; i++) {
+		                        var row = result.rows.item(i);
+		                        console.log(row.Name)
+		                        
+		                    }
+		                }
+		            }, errorHandler);
+		    }, errorHandler, nullHandler);
+
+		    return;
+		}
+
+		function ListDBValues2() {
+
+			$(".bg-primary").remove();
+		   
+		    var db = openDatabase('mydb-test', '1.0', 'sqllite test database', 2 * 1024 * 1024);
+		    db.transaction(function (transaction) {
+		    	var sqlstmt="SELECT * FROM Racing WHERE stable LIKE '%"+$('#search').val()+"%' ;"
+		        transaction.executeSql(sqlstmt, [],
+		            function (transaction, result) {
+		                if (result != null && result.rows != null) {
+		                    console.log(result.rows)
+		                    for (var i = 0; i < result.rows.length; i++) {
+		                        var row = result.rows.item(i);
+		                        console.log(row.Name)
+
+		                        strRow='<tr class="bg-primary"><td>'+row.RId+'</td>'+'<td>'+row.stable+'</td>'+'<td>'+row.win+'</td>'+'<tr>';
+		                        $('#table1').append(strRow);
+		                    }
+		                }
+		            }, errorHandler);
+		    }, errorHandler, nullHandler);
+
+		    return;
+		}
+
+		function nullHandler() {};
+		$(document).ready(function () {
+		    // Opening a existing database or creating a new one if don't exist
+		    var db = openDatabase('mydb-test', '1.0', 'sqllite test database', 2 * 1024 * 1024);
+		    db.transaction(function (tx) {
+		        // Create a table in if not exist
+		        tx.executeSql('CREATE TABLE IF NOT EXISTS Racing(RId INTEGER NOT NULL PRIMARY KEY, stable TEXT NOT NULL, win TEXT NOT NULL)', [], nullHandler, errorHandler);
+		    }, errorHandler, successCallBack);
+		});
+		ListDBValues();
+		$(document).on('click', '#submit', function () {
+		    var db = openDatabase('mydb-test', '1.0', 'sqllite test database', 2 * 1024 * 1024);
+		    db.transaction(function (tx) {
+		        tx.executeSql('INSERT INTO Racing (stable, win) VALUES (?, ?)', [$('#name').val(), $('#msg').val()], nullHandler, errorHandler);
+		    });
+		    ListDBValues();
+
+		    alert("Record Inserted Successfully");
+		});
+
+
+		$(document).on('click', '#delete', function () {
+		    var db = openDatabase('mydb-test', '1.0', 'sqllite test database', 2 * 1024 * 1024);
+		    db.transaction(function (tx) {
+		        tx.executeSql('delete from Racing where RID=? ;', [$('#id').val()], nullHandler, errorHandler);
+		    });
+		    ListDBValues();
+		    alert("Record Deleted Successfully");
+		});
+
+
+
+		$(document).on('click', '#Update', function () {
+		    var db = openDatabase('mydb-test', '1.0', 'sqllite test database', 2 * 1024 * 1024);
+		    db.transaction(function (tx) {
+
+		    	var sqlstmt="UPDATE Racing SET stable=? , win=? where RID=?;";
+
+		    	console.log(sqlstmt);
+
+
+		        tx.executeSql(sqlstmt, [$('#stableup').val(),$('#msgup').val(),$('#idup').val()], nullHandler, errorHandler);
+		    });
+		    ListDBValues();
+		    alert("Record Updated Successfully");
+		});
+
+
+		// $(document).ready(function(){
+
+		// 	var db = openDatabase('mydb-test', '1.0', 'sqllite test database', 2 * 1024 * 1024);
+		//     db.transaction(function (tx) {
+
+		//     	var sqlstmt='drop table Racing';
+
+		//     	console.log(sqlstmt);
+
+
+		//         tx.executeSql(sqlstmt, [], nullHandler, errorHandler);
+		//     });
+		//     ListDBValues();
+		//     alert("table drop sucess  Successfully");
+
+		// });
+
+
+
+	</script>
+
+	<style type="text/css">
+		.btn-success{
+			margin:auto;
+		}
+
+		.heading1{
+			background-color: #ffa502;
+
+
+		}
+
+		footer{
+			background-color: #ffa502;
+
+		}
+
+
+		body { padding: 0; background-color: #ffffff;
+
+
+
+		}
+.heading1,
+.heading1 h1 {
+
+	margin-top:0;
+
+}
+
+
+
+
+	</style>
+
+</head>
+
+	<body>
+
+
+
+<div class="row">
+  <div class="col-sm-12 heading1">
+
+  	<h1>BETTING SYSTEM <span style="font-size:22px;">&#174;</span></h1>
+
+  </div>
+
+</div>
+ 
+
+
+
+
+
+
+
+
+
+
+			
+
+
+  <ul class="nav nav-tabs">
+    <li class="active"><a data-toggle="tab" href="#home">Add Record</a></li>
+    <li><a data-toggle="tab" href="#menu1">Delete Record</a></li>
+    <li><a data-toggle="tab" href="#menu2">View Record</a></li>
+    <li><a data-toggle="tab" href="#menu3">Update Record</a></li>
+    <li><a data-toggle="tab" href="#menu4">Betting Amount List</a></li>
+  </ul>
+
+  <div class="tab-content">
+    <div id="home" class="tab-pane fade in active">
+      <h3>HOME</h3>
+      		<input type="text" class="form-control" id="name" placeholder="Stable" /></br>
+			<input type="text" class="form-control" id="msg" placeholder="Win or Lost" /></br>
+			<input type="button" class="btn-success" value="Add Message" id="submit">
+
+
+
+
+
+
+    </div>
+
+
+    <div id="menu1" class="tab-pane fade">
+      <h3>Delete Record</h3>
+      <input type="text" id="id" class="form-control" placeholder="ID" /></br>
+      <input type="button" class="btn-danger" value="Delete" id="delete"><br><br>
+    </div>
+
+
+    <div id="menu2" class="tab-pane fade">
+      <h3>View Record</h3>
+      <input type="text" class="form-control"  placeholder="Search" id="search" onkeyup="ListDBValues2()"><br>
+
+
+			<table class="table" id="table1">
+
+				<tr class="bg-danger">
+		    <th>ID</th>
+		    <th>Stable </th>
+		    <th>WIN/LOSE</th>
+			  </tr>
+				
+			</table>
+
+    </div>
+
+    <div id="menu3" class="tab-pane fade">
+      <h3>Update Record</h3>
+      <input type="text" id="idup" class="form-control" placeholder="ID" /></br>
+      <input type="text" id="stableup" class="form-control" placeholder="Stable" /></br>
+      <input type="text" id="msgup" class="form-control" placeholder="Win/Lose" /></br>
+      <input type="button" class="btn-success" value="Update" id="Update"><br><br>
+    </div>
+
+    <div id="menu4" class="tab-pane fade">
+      <h3>AMOUNTS</h3>
+      <table class="table" id="table1">
+
+				<tr class="bg-warning">
+		    <th>Bet No</th>
+		    <th>Amount </th>
+		    <th>Total</th>
+			  </tr>
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">1</td>
+		    <td style="text-align:center">5 </td>
+		    <td style="text-align:center"></td>
+			  </tr>
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">2</td>
+		    <td style="text-align:center">5 </td>
+		    <td style="text-align:center">10</td>
+			  </tr>
+
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">3</td>
+		    <td style="text-align:center">10 </td>
+		    <td style="text-align:center">20</td>
+			  </tr>
+
+
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">4</td>
+		    <td style="text-align:center">15 </td>
+		    <td style="text-align:center">35</td>
+			  </tr>
+
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">5</td>
+		    <td style="text-align:center">25 </td>
+		    <td style="text-align:center">60</td>
+			  </tr>
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">6</td>
+		    <td style="text-align:center">40 </td>
+		    <td style="text-align:center">100</td>
+			  </tr>
+
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">7</td>
+		    <td style="text-align:center">65 </td>
+		    <td style="text-align:center">165</td>
+			  </tr>
+
+
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">8</td>
+		    <td style="text-align:center">105 </td>
+		    <td style="text-align:center">270</td>
+			  </tr>
+
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">9</td>
+		    <td style="text-align:center">170 </td>
+		    <td style="text-align:center">440</td>
+			  </tr>
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">10</td>
+		    <td style="text-align:center">275 </td>
+		    <td style="text-align:center">715</td>
+			  </tr>
+
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">11</td>
+		    <td style="text-align:center">430 </td>
+		    <td style="text-align:center">1145</td>
+			  </tr>
+
+
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">12</td>
+		    <td style="text-align:center">700</td>
+		    <td style="text-align:center">1845</td>
+			  </tr>
+
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">13</td>
+		    <td style="text-align:center">1100 </td>
+		    <td style="text-align:center">2945</td>
+			  </tr>
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">14</td>
+		    <td style="text-align:center">1800</td>
+		    <td style="text-align:center">4800</td>
+			  </tr>
+
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">15</td>
+		    <td style="text-align:center">2700</td>
+		    <td style="text-align:center">7500</td>
+			  </tr>
+
+
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">16</td>
+		    <td style="text-align:center">4000</td>
+		    <td style="text-align:center">11500</td>
+			  </tr>
+
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">17</td>
+		    <td style="text-align:center">6700</td>
+		    <td style="text-align:center">18000</td>
+			  </tr>
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">18</td>
+		    <td style="text-align:center">10500</td>
+		    <td style="text-align:center">28200</td>
+			  </tr>
+
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">19</td>
+		    <td style="text-align:center">16000 </td>
+		    <td style="text-align:center">44000</td>
+			  </tr>
+
+
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">20</td>
+		    <td style="text-align:center">26000</td>
+		    <td style="text-align:center">70600</td>
+			  </tr>
+
+
+			  <tr class="bg-primary">
+		    <td style="text-align:center">21</td>
+		    <td style="text-align:center">40000</td>
+		    <td style="text-align:center">110000</td>
+			  </tr>
+
+
+
+			  
+
+
+
+
+
+			  
+				
+			</table>
+    </div>
+  </div>
+
+
+  <br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+
+<footer>
+  <h1>All Right Reserved <span style="font-size:22px;">&#169;</span></h1>
+</footer>
+
+
+	</body>
+</html>
+
+
+<!--rs@income.cz  aa123456-->
